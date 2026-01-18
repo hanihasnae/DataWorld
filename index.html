@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataWorld - From Data to Decision</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f9fc;
+            --bg-card: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --accent: #4c51bf;
+            --accent-hover: #5a67d8;
+            --accent-light: #667eea;
+            --border: #e2e8f0;
+            --shadow: rgba(76, 81, 191, 0.1);
+            --code-bg: #edf2f7;
+            --infographic-bg: #fafbfc;
+            --success: #48bb78;
+            --warning: #ed8936;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a202c;
+            --bg-secondary: #2d3748;
+            --bg-card: #2d3748;
+            --text-primary: #f7fafc;
+            --text-secondary: #cbd5e0;
+            --accent: #667eea;
+            --accent-hover: #7c88f0;
+            --accent-light: #9f7aea;
+            --border: #4a5568;
+            --shadow: rgba(102, 126, 234, 0.15);
+            --code-bg: #4a5568;
+            --infographic-bg: #2d3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(100px);
+            transition: all 0.4s ease;
+            z-index: 999;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-to-top:hover {
+            background: var(--accent-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        /* Reading Progress Bar */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-light));
+            z-index: 1001;
+            transition: width 0.2s ease;
+        }
+
+        /* Page Transition Overlay */
+        .page-transition {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            pointer-events: none;
+        }
+
+        .page-transition.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--accent-hover);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--text-primary);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .tooltip:hover::after,
+        .tooltip:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px var(--shadow);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Focus Visible for Accessibility */
+        *:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 3px;
+        }
+
+        /* Skip to Content Link */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 0;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            z-index: 10000;
+            transition: top 0.3s ease;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px var(--shadow);
+            transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            height: 50px;
+            width: auto;
+            border-radius: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover .logo-image {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            transition: color 0.4s ease;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .theme-toggle:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border-radius: 12px;
+            margin-bottom: 4rem;
+            transition: background 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 20px); }
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text {
+            order: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            line-height: 1.2;
+            transition: color 0.4s ease;
+            overflow: hidden;
+        }
+
+        .typing-text {
+            display: inline-block;
+            border-right: 3px solid var(--accent);
+            padding-right: 5px;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .hero .subtitle {
+            font-size: 1.4rem;
+            color: var(--accent-light);
+            margin-bottom: 2rem;
+            font-style: italic;
+            font-weight: 500;
+            transition: color 0.4s ease;
+        }
+
+        .hero-intro {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-weight: 400;
+            transition: color 0.4s ease;
+        }
+
+        .hero-visual {
+            order: 2;
+            position: relative;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px var(--shadow);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+            will-change: transform;
+        }
+
+        .hero-image:hover {
+            transform: scale(1.02) translateY(-4px);
+            box-shadow: 0 12px 32px var(--shadow);
+        }
+
+        /* Parallax effect on scroll */
+        .parallax {
+            transition: transform 0.1s ease-out;
+        }
+
+        .section {
+            margin-bottom: 5rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            border-left: 6px solid var(--accent);
+            padding-left: 1.5rem;
+            transition: color 0.4s ease, border-color 0.4s ease;
+        }
+
+        .separator {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            margin: 4rem 0;
+            transition: background 0.4s ease;
+        }
+
+        .diagram {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 3rem 0;
+            text-align: center;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .diagram-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .diagram-item {
+            flex: 1;
+            min-width: 150px;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .diagram-item.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .diagram-item:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .diagram-item:nth-child(3) {
+            transition-delay: 0.2s;
+        }
+
+        .diagram-item:nth-child(5) {
+            transition-delay: 0.3s;
+        }
+
+        .diagram-item:nth-child(7) {
+            transition-delay: 0.4s;
+        }
+
+        .diagram-arrow {
+            font-size: 2rem;
+            color: var(--accent);
+            transition: color 0.4s ease, transform 0.3s ease;
+            opacity: 0;
+        }
+
+        .diagram-arrow.animate {
+            opacity: 1;
+        }
+
+        .diagram-arrow:nth-child(2) {
+            transition-delay: 0.15s;
+        }
+
+        .diagram-arrow:nth-child(4) {
+            transition-delay: 0.25s;
+        }
+
+        .diagram-arrow:nth-child(6) {
+            transition-delay: 0.35s;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .module-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            opacity: 0;
+            border-radius: 12px;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .module-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .module-card.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .module-card:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .module-card:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .module-card:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+
+        .module-card:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+
+        .module-card:nth-child(5) {
+            transition-delay: 0.5s;
+        }
+
+        .module-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-12px);
+            box-shadow: 0 12px 32px var(--shadow);
+        }
+
+        .module-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .module-card:hover .module-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .module-card h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+            transition: color 0.4s ease;
+        }
+
+        .module-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            transition: color 0.4s ease;
+        }
+
+        .module-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            transition: color 0.4s ease;
+        }
+
+        .module-content {
+            display: none;
+            opacity: 0;
+            animation: fadeInContent 0.5s ease forwards;
+        }
+
+        .module-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInContent {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid var(--accent);
+            transition: border-color 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .module-header h2 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            transition: color 0.4s ease;
+        }
+
+        .intro-box {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--accent);
+            padding: 2rem;
+            margin: 3rem 0;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease 0.2s forwards;
+        }
+
+        .infographic-container {
+            background: var(--infographic-bg);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin: 3rem auto;
+            max-width: 900px;
+            box-shadow: 0 4px 12px var(--shadow);
+            text-align: center;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px) scale(0.98);
+        }
+
+        .infographic-container.animate {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .infographic-title {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: color 0.4s ease;
+        }
+
+        .infographic {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: zoom-in;
+        }
+
+        .infographic:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Image Modal */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+            padding: 2rem;
+        }
+
+        .image-modal.active {
+            display: flex;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .media-section {
+            margin: 4rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease 0.4s forwards;
+        }
+
+        .audio-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            transition: all 0.4s ease;
+        }
+
+        .audio-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--shadow);
+        }
+
+        .audio-title {
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            transition: color 0.4s ease;
+        }
+
+        .audio-player {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .download-container {
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .download-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .download-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--shadow);
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 3rem;
+            border: 1px solid var(--border);
+        }
+
+        .back-btn:hover {
+            background: var(--border);
+            transform: translateX(-4px);
+        }
+
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            margin-top: 5rem;
+            transition: all 0.4s ease;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            transition: color 0.4s ease;
+        }
+
+        .footer-identity {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .footer-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            height: 45px;
+            width: auto;
+            border-radius: 4px;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .footer-brand-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            transition: color 0.4s ease;
+        }
+
+        .footer-brand-tagline {
+            font-size: 0.95rem;
+            color: var(--accent-light);
+            font-style: italic;
+            transition: color 0.4s ease;
+        }
+
+        .footer-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            transition: color 0.4s ease;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .footer-academic-info {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            transition: color 0.4s ease;
+        }
+
+        .footer-academic-info p {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-academic-info strong {
+            color: var(--text-primary);
+            transition: color 0.4s ease;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.4s ease;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Print Styles */
+        @media print {
+            .scroll-to-top,
+            .reading-progress,
+            .theme-toggle,
+            .audio-container,
+            .download-btn,
+            .back-btn,
+            footer {
+                display: none;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .hero,
+            .diagram,
+            .module-card,
+            .infographic-container {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .hero-text {
+                order: 2;
+                text-align: center;
+            }
+
+            .hero-visual {
+                order: 1;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .module-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram-content {
+                flex-direction: column;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .logo-image {
+                height: 40px;
+            }
+
+            .logo-text {
+                font-size: 1.4rem;
+            }
+
+            .footer-logo {
+                height: 35px;
+            }
+
+            .footer-brand-name {
+                font-size: 1.3rem;
+            }
+
+            .scroll-to-top {
+                width: 45px;
+                height: 45px;
+                bottom: 1.5rem;
+                right: 1.5rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip to Content Link -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+    <!-- Reading Progress Bar -->
+    <div class="reading-progress" role="progressbar" aria-label="Progression de lecture"></div>
+
+    <!-- Page Transition Overlay -->
+    <div class="page-transition"></div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" aria-label="Retour en haut" title="Retour en haut">
+        ↑
+    </button>
+
+    <!-- Toast Notification -->
+    <div class="toast" role="alert" aria-live="polite">
+        <span class="toast-icon">✓</span>
+        <span class="toast-message"></span>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="image-modal" role="dialog" aria-label="Agrandissement de l'image">
+        <img src="" alt="">
+    </div>
+
+    <header>
+        <nav role="navigation" aria-label="Navigation principale">
+            <div class="logo">
+                <img src="logo.jpeg" alt="DataWorld Logo" class="logo-image">
+                <span class="logo-text">DataWorld</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showHome()">Accueil</a></li>
+                <li><a href="#modules">Modules</a></li>
+                <li><button class="theme-toggle" onclick="toggleTheme()" aria-label="Changer le thème">Mode sombre</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <div class="container">
+            <div id="home-content">
+                <div class="hero reveal">
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <h1><span class="typing-text">DataWorld</span></h1>
+                            <p class="subtitle">From Data to Decision</p>
+                            <div class="hero-intro">
+                                <p>DataWorld explore le parcours fondamental qui transforme les données brutes en connaissances structurées. Ce projet universitaire examine comment les organisations capturent, organisent et exploitent l'information pour éclairer leurs décisions stratégiques. De la conception de modèles relationnels à l'architecture des systèmes décisionnels, découvrez les fondations techniques qui alimentent l'intelligence moderne.</p>
+                            </div>
+                        </div>
+                        <div class="hero-visual">
+                            <img src="pic.jpeg" alt="Visualisation de l'intelligence des données" class="hero-image parallax">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="separator"></div>
+
+                <div class="section reveal">
+                    <h2 class="section-title">Du Chaos à la Décision</h2>
+                    <div class="diagram">
+                        <h3 style="margin-bottom: 2rem; color: var(--accent); font-size: 1.5rem;">Le Parcours des Données</h3>
+                        <div class="diagram-content">
+                            <div class="diagram-item">
+                                <h4>📊 Données Brutes</h4>
+                                <p>Chaos, incohérence, redondance</p>
+                            </div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-item">
+                                <h4>🗄️ Base de Données</h4>
+                                <p>Structure, intégrité, cohérence</p>
+                            </div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-item">
+                                <h4>💡 Information</h4>
+                                <p>Requêtes, analyses, insights</p>
+                            </div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-item">
+                                <h4>🎯 Décision</h4>
+                                <p>Stratégie, action, valeur</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="separator"></div>
+
+                <div class="section reveal" id="modules">
+                    <h2 class="section-title">Les 5 Modules</h2>
+                    <div class="module-grid">
+                        <div class="module-card tooltip" data-tooltip="Cliquez pour explorer" onclick="showModule(1)" tabindex="0" role="button" aria-label="Module 1: Le chaos des données">
+                            <div class="module-icon">🌪️</div>
+                            <h3>Module 1</h3>
+                            <h4>Le chaos des données</h4>
+                            <p>Comprendre les problèmes fondamentaux du stockage de données et l'émergence des bases de données relationnelles</p>
+                        </div>
+                        <div class="module-card tooltip" data-tooltip="Cliquez pour explorer" onclick="showModule(2)" tabindex="0" role="button" aria-label="Module 2: Modéliser la réalité">
+                            <div class="module-icon">🏗️</div>
+                            <h3>Module 2</h3>
+                            <h4>Modéliser la réalité</h4>
+                            <p>Conception de modèles de données avec les diagrammes entité-association et la normalisation</p>
+                        </div>
+                        <div class="module-card tooltip" data-tooltip="Cliquez pour explorer" onclick="showModule(3)" tabindex="0" role="button" aria-label="Module 3: Faire vivre les données">
+                            <div class="module-icon">⚡</div>
+                            <h3>Module 3</h3>
+                            <h4>Faire vivre les données</h4>
+                            <p>Maîtriser SQL et les transactions pour interroger et manipuler les données en toute sécurité</p>
+                        </div>
+                        <div class="module-card tooltip" data-tooltip="Cliquez pour explorer" onclick="showModule(4)" tabindex="0" role="button" aria-label="Module 4: Performance, scalabilité et NoSQL">
+                            <div class="module-icon">🚀</div>
+                            <h3>Module 4</h3>
+                            <h4>Performance, scalabilité et NoSQL</h4>
+                            <p>Optimisation des performances et découverte des bases de données NoSQL pour le Big Data</p>
+                        </div>
+                        <div class="module-card tooltip" data-tooltip="Cliquez pour explorer" onclick="showModule(5)" tabindex="0" role="button" aria-label="Module 5: Données, architecture et décision">
+                            <div class="module-icon">🎯</div>
+                            <h3>Module 5</h3>
+                            <h4>Données, architecture et décision</h4>
+                            <p>Architecture des systèmes d'information et transformation des données en intelligence décisionnelle</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="module1-content" class="module-content">
+                <nav class="breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="#" onclick="showHome()">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Module 1</span>
+                </nav>
+
+                <div class="module-header">
+                    <span style="font-size: 3rem;">🌪️</span>
+                    <h2>Module 1 : Le chaos des données</h2>
+                </div>
+
+                <div class="intro-box">
+                    <p><strong>Problématique :</strong> Imaginez une entreprise où les informations clients sont dispersées dans des fichiers Excel entre différents services. Un client change d'adresse, mais l'information n'est mise à jour que dans un seul fichier. Résultat : livraisons ratées, factures mal envoyées, campagnes marketing inefficaces. Ce chaos de données coûte temps, argent et crédibilité. Comment les bases de données relationnelles résolvent-elles ce problème fondamental ?</p>
+                </div>
+
+                <div class="infographic-container">
+                    <div class="infographic-title">📊 Infographie du Module</div>
+                    <img src="module1.jpeg" alt="Infographie Module 1" class="infographic" onclick="openImageModal(this.src)">
+                </div>
+
+                <div class="media-section">
+                    <div class="audio-container">
+                        <div class="audio-title">🎧 Contenu Audio</div>
+                        <audio controls class="audio-player" aria-label="Lecture audio du module 1">
+                            <source src="module1.m4a" type="audio/mp4">
+                            Votre navigateur ne supporte pas l'élément audio.
+                        </audio>
+                    </div>
+
+                    <div class="download-container">
+                        <a href="module1.pdf" download class="download-btn" onclick="showToast('Téléchargement du PDF en cours...')">📥 Télécharger le PDF du Module 1</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="showHome()" class="back-btn">← Retour à l'accueil</a>
+            </div>
+
+            <div id="module2-content" class="module-content">
+                <nav class="breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="#" onclick="showHome()">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Module 2</span>
+                </nav>
+
+                <div class="module-header">
+                    <span style="font-size: 3rem;">🏗️</span>
+                    <h2>Module 2 : Modéliser la réalité</h2>
+                </div>
+
+                <div class="intro-box">
+                    <p><strong>Problématique :</strong> Une université doit gérer étudiants, cours, professeurs, salles et départements avec leurs relations complexes. Comment s'assurer qu'un étudiant ne s'inscrit pas à deux cours simultanés ? Comment représenter qu'un cours peut avoir plusieurs prérequis ? La modélisation entité-association et la normalisation répondent à ces défis en transformant la complexité du monde réel en un schéma de base de données cohérent et performant.</p>
+                </div>
+
+                <div class="infographic-container">
+                    <div class="infographic-title">📊 Infographie du Module</div>
+                    <img src="module2.jpeg" alt="Infographie Module 2" class="infographic" onclick="openImageModal(this.src)">
+                </div>
+
+                <div class="media-section">
+                    <div class="audio-container">
+                        <div class="audio-title">🎧 Contenu Audio</div>
+                        <audio controls class="audio-player" aria-label="Lecture audio du module 2">
+                            <source src="module2.m4a" type="audio/mp4">
+                            Votre navigateur ne supporte pas l'élément audio.
+                        </audio>
+                    </div>
+
+                    <div class="download-container">
+                        <a href="module2.pdf" download class="download-btn" onclick="showToast('Téléchargement du PDF en cours...')">📥 Télécharger le PDF du Module 2</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="showHome()" class="back-btn">← Retour à l'accueil</a>
+            </div>
+
+            <div id="module3-content" class="module-content">
+                <nav class="breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="#" onclick="showHome()">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Module 3</span>
+                </nav>
+
+                <div class="module-header">
+                    <span style="font-size: 3rem;">⚡</span>
+                    <h2>Module 3 : Faire vivre les données</h2>
+                </div>
+
+                <div class="intro-box">
+                    <p><strong>Problématique :</strong> Une banque traite des milliers de transactions par seconde. Un client transfère 1000 euros de son compte courant vers son compte épargne. Que se passe-t-il si le système plante après le débit mais avant le crédit ? Les 1000 euros disparaissent. Le système doit garantir que ces opérations critiques s'exécutent de manière atomique, cohérente, isolée et durable. SQL et les transactions ACID sont la réponse à ce défi fondamental.</p>
+                </div>
+
+                <div class="infographic-container">
+                    <div class="infographic-title">📊 Infographie du Module</div>
+                    <img src="module3.jpeg" alt="Infographie Module 3" class="infographic" onclick="openImageModal(this.src)">
+                </div>
+
+                <div class="media-section">
+                    <div class="audio-container">
+                        <div class="audio-title">🎧 Contenu Audio</div>
+                        <audio controls class="audio-player" aria-label="Lecture audio du module 3">
+                            <source src="module3.m4a" type="audio/mp4">
+                            Votre navigateur ne supporte pas l'élément audio.
+                        </audio>
+                    </div>
+
+                    <div class="download-container">
+                        <a href="module3.pdf" download class="download-btn" onclick="showToast('Téléchargement du PDF en cours...')">📥 Télécharger le PDF du Module 3</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="showHome()" class="back-btn">← Retour à l'accueil</a>
+            </div>
+
+            <div id="module4-content" class="module-content">
+                <nav class="breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="#" onclick="showHome()">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Module 4</span>
+                </nav>
+
+                <div class="module-header">
+                    <span style="font-size: 3rem;">🚀</span>
+                    <h2>Module 4 : Performance, scalabilité et NoSQL</h2>
+                </div>
+
+                <div class="intro-box">
+                    <p><strong>Problématique :</strong> Un réseau social compte 500 millions d'utilisateurs générant des milliards d'interactions quotidiennes. Afficher un fil d'actualité nécessiterait des jointures complexes sur des milliards de lignes avec un temps de réponse inacceptable. Comment garantir des temps de réponse de quelques millisecondes ? Comment faire évoluer le système pour gérer une croissance exponentielle ? L'optimisation avancée et les bases NoSQL offrent des solutions à ces défis de performance et de scalabilité.</p>
+                </div>
+
+                <div class="infographic-container">
+                    <div class="infographic-title">📊 Infographie du Module</div>
+                    <img src="module4.jpeg" alt="Infographie Module 4" class="infographic" onclick="openImageModal(this.src)">
+                </div>
+
+                <div class="media-section">
+                    <div class="audio-container">
+                        <div class="audio-title">🎧 Contenu Audio</div>
+                        <audio controls class="audio-player" aria-label="Lecture audio du module 4">
+                            <source src="module4.m4a" type="audio/mp4">
+                            Votre navigateur ne supporte pas l'élément audio.
+                        </audio>
+                    </div>
+
+                    <div class="download-container">
+                        <a href="module4.pdf" download class="download-btn" onclick="showToast('Téléchargement du PDF en cours...')">📥 Télécharger le PDF du Module 4</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="showHome()" class="back-btn">← Retour à l'accueil</a>
+            </div>
+
+            <div id="module5-content" class="module-content">
+                <nav class="breadcrumb" aria-label="Fil d'Ariane">
+                    <a href="#" onclick="showHome()">Accueil</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Module 5</span>
+                </nav>
+
+                <div class="module-header">
+                    <span style="font-size: 3rem;">🎯</span>
+                    <h2>Module 5 : Données, architecture et décision</h2>
+                </div>
+
+                <div class="intro-box">
+                    <p><strong>Problématique :</strong> Une chaîne de distribution possède des dizaines de systèmes hérités avec des formats et standards différents. Le directeur général veut connaître la rentabilité par produit, région et canal de vente, mais les données sont dispersées dans des silos incompatibles. Comment intégrer ces sources hétérogènes ? Comment transformer ces données opérationnelles en intelligence stratégique ? L'architecture des systèmes d'information et le décisionnel répondent à ce défi d'intégration et d'analyse.</p>
+                </div>
+
+                <div class="infographic-container">
+                    <div class="infographic-title">📊 Infographie du Module</div>
+                    <img src="module5.jpeg" alt="Infographie Module 5" class="infographic" onclick="openImageModal(this.src)">
+                </div>
+
+                <div class="media-section">
+                    <div class="audio-container">
+                        <div class="audio-title">🎧 Contenu Audio</div>
+                        <audio controls class="audio-player" aria-label="Lecture audio du module 5">
+                            <source src="module5.m4a" type="audio/mp4">
+                            Votre navigateur ne supporte pas l'élément audio.
+                        </audio>
+                    </div>
+
+                    <div class="download-container">
+                        <a href="module5.pdf" download class="download-btn" onclick="showToast('Téléchargement du PDF en cours...')">📥 Télécharger le PDF du Module 5</a>
+                    </div>
+                </div>
+
+                <a href="#" onclick="showHome()" class="back-btn">← Retour à l'accueil</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="reveal">
+        <div class="footer-content">
+            <div class="footer-section footer-identity">
+                <div class="footer-logo-container">
+                    <img src="logo.jpeg" alt="DataWorld Logo" class="footer-logo">
+                    <div class="footer-brand">
+                        <span class="footer-brand-name">DataWorld</span>
+                        <span class="footer-brand-tagline">From Data to Decision</span>
+                    </div>
+                </div>
+                <p class="footer-description">
+                    Un projet universitaire explorant les fondations techniques des systèmes de gestion de données et leur rôle dans l'intelligence décisionnelle moderne.
+                </p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Navigation</h3>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showHome()">Accueil</a></li>
+                    <li><a href="#modules">Modules</a></li>
+                    <li><a href="#" onclick="showHome()">Concept</a></li>
+                    <li><a href="#" onclick="showHome()">À propos</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Informations</h3>
+                <div class="footer-academic-info">
+                    <p><strong>Projet Universitaire</strong></p>
+                    <p>Année académique 2025-2026</p>
+                    <p>Bases de Données</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 DataWorld - From Data to Decision | Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = newTheme === 'dark' ? 'Mode clair' : 'Mode sombre';
+            
+            localStorage.setItem('theme', newTheme);
+            showToast(`Thème ${newTheme === 'dark' ? 'sombre' : 'clair'} activé`);
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                const btn = document.querySelector('.theme-toggle');
+                btn.textContent = savedTheme === 'dark' ? 'Mode clair' : 'Mode sombre';
+            }
+        });
+
+        // Page Transition
+        function pageTransition(callback) {
+            const overlay = document.querySelector('.page-transition');
+            overlay.classList.add('active');
+            
+            setTimeout(() => {
+                callback();
+                overlay.classList.remove('active');
+            }, 300);
+        }
+
+        // Show Home
+        function showHome() {
+            pageTransition(() => {
+                document.getElementById('home-content').style.display = 'block';
+                document.getElementById('module1-content').classList.remove('active');
+                document.getElementById('module2-content').classList.remove('active');
+                document.getElementById('module3-content').classList.remove('active');
+                document.getElementById('module4-content').classList.remove('active');
+                document.getElementById('module5-content').classList.remove('active');
+                window.scrollTo(0, 0);
+                
+                setTimeout(() => {
+                    initScrollAnimations();
+                }, 100);
+            });
+        }
+
+        // Show Module
+        function showModule(num) {
+            pageTransition(() => {
+                document.getElementById('home-content').style.display = 'none';
+                document.getElementById('module1-content').classList.remove('active');
+                document.getElementById('module2-content').classList.remove('active');
+                document.getElementById('module3-content').classList.remove('active');
+                document.getElementById('module4-content').classList.remove('active');
+                document.getElementById('module5-content').classList.remove('active');
+                document.getElementById('module' + num + '-content').classList.add('active');
+                window.scrollTo(0, 0);
+                
+                setTimeout(() => {
+                    const infographicContainer = document.querySelector('#module' + num + '-content .infographic-container');
+                    if (infographicContainer) {
+                        infographicContainer.classList.add('animate');
+                    }
+                }, 300);
+            });
+        }
+
+        // Scroll to Top Button
+        const scrollToTopBtn = document.querySelector('.scroll-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Reading Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.querySelector('.reading-progress').style.width = scrolled + '%';
+        });
+
+        // Parallax Effect
+        window.addEventListener('scroll', () => {
+            const parallaxElements = document.querySelectorAll('.parallax');
+            parallaxElements.forEach(el => {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * 0.3;
+                el.style.transform = `translateY(${rate}px)`;
+            });
+        });
+
+        // Toast Notification
+        function showToast(message) {
+            const toast = document.querySelector('.toast');
+            const toastMessage = toast.querySelector('.toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Image Modal
+        function openImageModal(src) {
+            const modal = document.querySelector('.image-modal');
+            const modalImg = modal.querySelector('img');
+            
+            modalImg.src = src;
+            modal.classList.add('active');
+        }
+
+        document.querySelector('.image-modal').addEventListener('click', function() {
+            this.classList.remove('active');
+        });
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelector('.image-modal').classList.remove('active');
+            }
+        });
+
+        // Module Cards Keyboard Support
+        document.querySelectorAll('.module-card').forEach((card, index) => {
+            card.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showModule(index + 1);
+                }
+            });
+        });
+
+        // Intersection Observer
+        const observerOptions = {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    
+                    if (entry.target.classList.contains('section')) {
+                        const moduleCards = entry.target.querySelectorAll('.module-card');
+                        moduleCards.forEach(card => {
+                            card.classList.add('animate');
+                        });
+                        
+                        const diagramItems = entry.target.querySelectorAll('.diagram-item');
+                        const diagramArrows = entry.target.querySelectorAll('.diagram-arrow');
+                        diagramItems.forEach(item => {
+                            item.classList.add('animate');
+                        });
+                        diagramArrows.forEach(arrow => {
+                            arrow.classList.add('animate');
+                        });
+                    }
+                }
+            });
+        }, observerOptions);
+
+        function initScrollAnimations() {
+            const revealElements = document.querySelectorAll('.reveal');
+            revealElements.forEach(el => {
+                el.classList.remove('active');
+                observer.observe(el);
+            });
+        }
+
+        // Typing Animation
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.textContent = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    element.classList.remove('typing-text');
+                }
+            }
+            
+            type();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initScrollAnimations();
+            
+            // Typing animation for hero title
+            const typingElement = document.querySelector('.typing-text');
+            if (typingElement) {
+                typeWriter(typingElement, 'DataWorld', 150);
+            }
+            
+            // Show welcome toast
+            setTimeout(() => {
+                showToast('Bienvenue sur DataWorld! 👋');
+            }, 1000);
+        });
+
+        // Lazy Loading Images
+        if ('loading' in HTMLImageElement.prototype) {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            images.forEach(img => {
+                img.src = img.dataset.src;
+            });
+        } else {
+            // Fallback for browsers that don't support lazy loading
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js';
+            document.body.appendChild(script);
+        }
+
+        // Performance: Debounce scroll events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Apply debounce to scroll-heavy functions
+        window.addEventListener('scroll', debounce(() => {
+            // Your scroll-dependent code here
+        }, 10));
+    </script>
+</body>
+</html>
